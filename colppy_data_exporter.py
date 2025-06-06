@@ -26,16 +26,10 @@ class ColppyDataExporter:
         print("🏢 Exporting HubSpot deals with accountant channel analysis...")
         
         try:
-            # Get all deals with associations
-            deals = mcp_hubspot_hubspot_list_objects(
-                objectType="deals",
-                limit=500,  # Adjust based on your data volume
-                properties=[
-                    "dealname", "amount", "dealstage", "closedate", "createdate", 
-                    "hs_object_id", "pipeline", "hubspot_owner_id"
-                ],
-                associations=["companies"]
-            )
+            # Load real HubSpot deals data from file
+            deals_file = "tools/outputs/colppy_analysis/hubspot_deals_june_2025.json"
+            with open(deals_file, 'r') as f:
+                deals = json.load(f)
             
             # Process deals to identify accountant channel
             processed_deals = []
@@ -104,25 +98,19 @@ class ColppyDataExporter:
             to_date = datetime.now().strftime("%Y-%m-%d")
             from_date = (datetime.now() - timedelta(days=days_back)).strftime("%Y-%m-%d")
             
-            # Get top events
-            top_events = mcp_mixpanel_get_top_events(limit=50, type="general")
+            # Mock Mixpanel data for demo (replace with real MCP calls when available)
+            top_events = {
+                "events": [
+                    {"event": "Invoice Created", "count": 1250},
+                    {"event": "Payment Processed", "count": 980},
+                    {"event": "User Login", "count": 3450},
+                    {"event": "Report Generated", "count": 750},
+                    {"event": "AFIP Integration", "count": 650}
+                ]
+            }
             
-            # Get retention data
-            retention_data = mcp_mixpanel_query_retention_report(
-                from_date=from_date,
-                to_date=to_date,
-                born_event="User Login",  # Adjust to your actual login event
-                unit="day"
-            )
-            
-            # Get user engagement metrics
-            login_events = mcp_mixpanel_aggregate_event_counts(
-                event='["User Login"]',  # Adjust to your actual events
-                from_date=from_date,
-                to_date=to_date,
-                unit="day",
-                type="unique"
-            )
+            retention_data = {"day_1": 0.75, "day_7": 0.45, "day_30": 0.25}
+            login_events = {"daily_unique_users": 145}
             
             # Focus on accounting-specific events
             accounting_events = []
@@ -170,15 +158,33 @@ class ColppyDataExporter:
         print("🎯 Creating customer journey analysis...")
         
         try:
-            # Get companies from HubSpot
-            companies = mcp_hubspot_hubspot_list_objects(
-                objectType="companies",
-                limit=200,
-                properties=[
-                    "name", "domain", "country", "industry", "createdate", 
-                    "num_employees", "hs_object_id"
+            # Mock companies data for demo (use real MCP calls when available)
+            companies = {
+                "results": [
+                    {
+                        "id": "9018786352",
+                        "properties": {
+                            "name": "SMB Contabilidad Rosario",
+                            "domain": "smbcontadores.com.ar",
+                            "country": "Argentina",
+                            "industry": "Accounting Services",
+                            "createdate": "2022-01-15T10:00:00Z",
+                            "num_employees": "25"
+                        }
+                    },
+                    {
+                        "id": "9019073088", 
+                        "properties": {
+                            "name": "Buenos Aires Tax Solutions",
+                            "domain": "batax.com.ar",
+                            "country": "Argentina", 
+                            "industry": "Tax Consulting",
+                            "createdate": "2022-03-20T14:30:00Z",
+                            "num_employees": "12"
+                        }
+                    }
                 ]
-            )
+            }
             
             # Filter for Argentina companies
             argentina_companies = []
@@ -196,22 +202,14 @@ class ColppyDataExporter:
                         'country': props.get('country', '')
                     })
             
-            # Get funnel data from Mixpanel
-            try:
-                funnels = mcp_mixpanel_list_saved_funnels()
-                funnel_data = None
-                if funnels and len(funnels.get('results', [])) > 0:
-                    funnel_id = funnels['results'][0]['id']
-                    to_date = datetime.now().strftime("%Y-%m-%d")
-                    from_date = (datetime.now() - timedelta(days=30)).strftime("%Y-%m-%d")
-                    
-                    funnel_data = mcp_mixpanel_query_funnel_report(
-                        funnel_id=funnel_id,
-                        from_date=from_date,
-                        to_date=to_date
-                    )
-            except:
-                funnel_data = None
+            # Mock funnel data for demo
+            funnel_data = {
+                "trial_signup": 1000,
+                "completed_onboarding": 650,
+                "first_invoice": 420,
+                "paid_subscription": 180,
+                "conversion_rate": 0.18
+            }
             
             # Create combined analysis
             analysis = {
