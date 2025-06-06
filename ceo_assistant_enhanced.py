@@ -63,80 +63,43 @@ class MCPDataConnector:
     def get_hubspot_deals_data(self, limit: int = 100, month: str = "2025-06") -> Dict:
         """
         Get real deals data using MCP HubSpot tools
-        Fetches actual data from HubSpot for specified month
+        NOTE: This method should be called in an MCP-enabled environment
         """
-        try:
-            # Use actual MCP HubSpot tool to get deals from specified month
-            from datetime import datetime
-            
-            # Parse month parameter and create date range
-            year, month_num = month.split("-")
-            start_date = f"{year}-{month_num.zfill(2)}-01"
-            
-            # Calculate last day of month
-            if month_num in ["01", "03", "05", "07", "08", "10", "12"]:
-                end_date = f"{year}-{month_num.zfill(2)}-31"
-            elif month_num in ["04", "06", "09", "11"]:
-                end_date = f"{year}-{month_num.zfill(2)}-30"
-            else:  # February
-                end_date = f"{year}-{month_num.zfill(2)}-28"
-            
-            # Make real MCP call to HubSpot - no cached data
-            logger.info(f"Making real MCP call for deals from {start_date} to {end_date}")
-            
-            # Import and use the real MCP function
-            import inspect
-            current_frame = inspect.currentframe()
-            
-            # Try to access MCP functions from the current context
-            try:
-                # This should work when running in MCP environment
-                result = globals().get('mcp_hubspot_hubspot_search_objects', lambda **kwargs: {"error": "MCP not available"})(
-                    objectType="deals",
-                    filterGroups=[{
-                        "filters": [{
-                            "propertyName": "createdate",
-                            "operator": "BETWEEN", 
-                            "value": start_date,
-                            "highValue": end_date
-                        }]
-                    }],
-                    properties=["dealname", "amount", "dealstage", "closedate", "createdate", "hs_object_id", "pipeline", "dealtype", "hubspot_owner_id"],
-                    limit=limit
-                )
-            except Exception as mcp_error:
-                logger.error(f"MCP call failed: {mcp_error}")
-                # Return error indicating real MCP call was attempted but failed
-                return {
-                    "results": [], 
-                    "total": 0, 
-                    "error": f"Real MCP call attempted but failed: {mcp_error}",
-                    "attempted_range": f"{start_date} to {end_date}"
-                }
-            
-            logger.info(f"Retrieved {len(result.get('results', []))} deals from HubSpot for {month}")
-            return result
-            
-        except Exception as e:
-            logger.error(f"HubSpot deals data error: {e}")
-            # Fallback to cached June 2025 data if API call fails
-            return {
-                "results": [
-                    {
-                        "id": "38286292543",
-                        "properties": {
-                            "amount": "122500",
-                            "closedate": "2025-06-17T16:28:43.134Z",
-                            "createdate": "2025-06-02T16:31:22.697Z",
-                            "dealname": "93281 - Zentor",
-                            "dealstage": "presentationscheduled",
-                            "dealtype": "NEW_BUSINESS"
-                        }
-                    }
-                ],
-                "total": 23,
-                "error": str(e)
-            }
+        # Parse month parameter and create date range
+        year, month_num = month.split("-")
+        start_date = f"{year}-{month_num.zfill(2)}-01"
+        
+        # Calculate last day of month
+        if month_num in ["01", "03", "05", "07", "08", "10", "12"]:
+            end_date = f"{year}-{month_num.zfill(2)}-31"
+        elif month_num in ["04", "06", "09", "11"]:
+            end_date = f"{year}-{month_num.zfill(2)}-30"
+        else:  # February
+            end_date = f"{year}-{month_num.zfill(2)}-28"
+        
+        logger.info(f"To get real data, use MCP tool: mcp_hubspot_hubspot_search_objects")
+        logger.info(f"Parameters: objectType='deals', date range {start_date} to {end_date}")
+        
+        # Return instructions for MCP usage
+        return {
+            "instruction": "Use MCP tool directly",
+            "mcp_tool": "mcp_hubspot_hubspot_search_objects",
+            "parameters": {
+                "objectType": "deals",
+                "filterGroups": [{
+                    "filters": [{
+                        "propertyName": "createdate",
+                        "operator": "BETWEEN", 
+                        "value": start_date,
+                        "highValue": end_date
+                    }]
+                }],
+                "properties": ["dealname", "amount", "dealstage", "closedate", "createdate", "hs_object_id", "pipeline", "dealtype", "hubspot_owner_id"],
+                "limit": limit
+            },
+            "date_range": f"{start_date} to {end_date}",
+            "note": "Call the MCP tool directly in MCP environment"
+        }
     
     def get_hubspot_contacts_metrics(self) -> Dict:
         """
