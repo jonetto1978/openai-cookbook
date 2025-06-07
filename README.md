@@ -71,6 +71,10 @@ python ceo_assistant_starter.py
 streamlit run ceo_assistant_app.py
 ```
 
+### 5. Test MCP Helpers with Cursor
+See `cursor_mcp_setup.md` for instructions on using the Cursor editor to try the Intercom helper.
+
+
 ## 📊 Features
 
 ### Strategic Planning Agent
